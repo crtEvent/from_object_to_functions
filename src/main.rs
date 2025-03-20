@@ -31,5 +31,5 @@ async fn main() {
 
     let app = Zettai::new(lists);
     println!("Server started at http://localhost:8080/todo/ape/book");
-    app.serve().await;
+    app.serve(8080).await;
 }

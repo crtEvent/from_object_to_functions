@@ -4,7 +4,7 @@ pub struct ToDoList {
     pub items: Vec<ToDoItem>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListName {
     pub name: String,
 }
@@ -14,7 +14,7 @@ pub struct User {
     pub name: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToDoItem {
     pub description: String,
 }

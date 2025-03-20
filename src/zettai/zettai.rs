@@ -19,7 +19,7 @@ impl Zettai {
         warp::reply::html(html)
     }
 
-    pub async fn serve(self) {
+    pub async fn serve(self, port: u16) {
         let end_page_route = warp::path::end()
             .map(move || Self::create_response(end_page()));
 
@@ -35,7 +35,74 @@ impl Zettai {
             .boxed();
 
         warp::serve(routes)
-            .run(([127, 0, 0, 1], 8080))
+            .run(([127, 0, 0, 1], port))
             .await;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use regex::Regex;
+    use std::collections::HashMap;
+    use reqwest::Client;
+    use crate::zettai::domain::{ListName, ToDoItem};
+
+    #[tokio::test]
+    async fn list_owners_can_see_their_lists() {
+        let user = User { name: "frank".to_string() };
+        let list_name = ListName { name: "shopping".to_string() };
+        let food_to_buy: Vec<ToDoItem> = vec!("carrots", "apples", "milk").into_iter()
+            .map(|item| ToDoItem { description: item.to_string() })
+            .collect();
+
+        start_the_application(&user, &list_name, &food_to_buy);
+        let list = get_to_do_list(&user, &list_name).await;
+
+        assert_eq!(list.list_name.name, list_name.name);
+        assert_eq!(list.items, food_to_buy);
+    }
+
+    async fn get_to_do_list(user: &User, list_name: &ListName) -> ToDoList {
+        let client = Client::new();
+        let url = format!("http://localhost:8081/todo/{}/{}", user.name, list_name.name);
+        let response = client.get(&url).send().await.unwrap();
+
+        if response.status().is_success() {
+            parse_response(&response.text().await.unwrap())
+        } else {
+            panic!("Request failed: {}", response.status());
+        }
+    }
+
+    fn parse_response(html: &str) -> ToDoList {
+        let name_regex = Regex::new("<h2>(.*?)<").unwrap();
+        let list_name = extract_list_name(&name_regex, html);
+        let items_regex = Regex::new("<td>(.*?)<").unwrap();
+        let items = items_regex.captures_iter(html)
+            .map(|cap| ToDoItem { description: cap[1].to_string() })
+            .collect();
+
+        ToDoList { list_name: ListName{ name: list_name }, items }
+    }
+
+    fn extract_list_name(name_regex: &Regex, html: &str) -> String {
+        name_regex.captures(html)
+            .map(|cap| cap[1].to_string())
+            .unwrap_or_default()
+    }
+
+    fn start_the_application(user: &User, list_name: &ListName, items: &Vec<ToDoItem>) {
+        let to_do_list = ToDoList {
+            list_name: list_name.clone(),
+            items: items.clone(),
+        };
+        let mut lists = HashMap::new();
+        lists.insert(user.clone(), vec![to_do_list]);
+
+        let app = Zettai::new(lists);
+        tokio::spawn(async move {
+            app.serve(8081u16).await;
+        });
     }
 }
