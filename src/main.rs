@@ -1,21 +1,9 @@
+mod exercises;
+mod zettai;
+
 use std::collections::HashMap;
 use crate::zettai::domain::{ListName, ToDoItem, ToDoList, User};
 use crate::zettai::zettai::Zettai;
-
-mod exercises {
-    pub mod ch01 {
-        pub mod prac1_2;
-        pub mod prac1_3;
-    }
-}
-mod zettai {
-    pub mod zettai;
-    pub mod domain;
-    pub mod page {
-        pub mod end_page;
-        pub mod show_list_page;
-    }
-}
 
 #[tokio::main]
 async fn main() {
