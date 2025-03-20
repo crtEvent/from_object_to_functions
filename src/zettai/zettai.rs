@@ -1,58 +1,40 @@
+use std::collections::HashMap;
 use warp::Filter;
 use warp::filters::BoxedFilter;
 use warp::reply::Html;
+use crate::zettai::domain::{ToDoList, User};
+use crate::zettai::page::end_page::end_page;
+use crate::zettai::page::show_list_page::list_page;
 
 pub struct Zettai {
-    routes: BoxedFilter<(Html<String>,)>
+    lists: HashMap<User, Vec<ToDoList>>,
 }
 
 impl Zettai {
-    pub fn new() -> Self {
-
-        let end_route = warp::path::end()
-            .map(Self::end_page);
-
-        let show_list_route = warp::path!("todo" / String / String)
-            .map(|user: String, list: String| Self::show_list_page(user, list));
-
-        let routes = end_route
-            .or(show_list_route)
-            .unify()
-            .boxed();
-
-        Zettai { routes }
+    pub fn new(lists: HashMap<User, Vec<ToDoList>>) -> Self {
+        Zettai { lists }
     }
 
-    fn end_page() -> Html<String> {
-        let html_page = r#"
-    <html>
-        <body>
-            <h1 style="text-align:center; font-size:3em";>Hello Function World!</h1>
-        </body>
-    </html>
-    "#.to_string();
-
-        warp::reply::html(html_page)
-    }
-
-    fn show_list_page(user: String, list: String) -> Html<String> {
-        let html_page = format!(
-            r#"
-        <html>
-            <body>
-                <h1>Zettai</h1>
-                <p>Here is the list <b>{}</b> of user <b>{}</b></p>
-            </body>
-        </html>
-        "#,
-            list, user
-        );
-
-        warp::reply::html(html_page)
+    fn create_response(html: String) -> Html<String> {
+        warp::reply::html(html)
     }
 
     pub async fn serve(self) {
-        warp::serve(self.routes)
+        let end_page_route = warp::path::end()
+            .map(move || Self::create_response(end_page()));
+
+        let lists = self.lists.clone();
+        let list_page_route = warp::path!("todo" / String / String)
+            .map(move |user: String, list_name: String|
+                Self::create_response(list_page(&lists, user, list_name))
+            );
+
+        let routes: BoxedFilter<(Html<String>,)> = end_page_route
+            .or(list_page_route)
+            .unify()
+            .boxed();
+
+        warp::serve(routes)
             .run(([127, 0, 0, 1], 8080))
             .await;
     }
