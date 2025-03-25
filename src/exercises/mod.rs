@@ -5,4 +5,5 @@ pub mod ch01 {
 
 pub mod ch02 {
     pub mod prac2_2;
+    pub mod prac2_3;
 }
