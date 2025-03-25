@@ -1,43 +1,49 @@
 use crate::exercises::ch02::prac2_2::FunStack;
 
 pub fn calc_rpn(expression: &str) -> f64 {
-    let tokens: Vec<&str> = expression.split_whitespace().collect();
-    let mut main_stack = FunStack::<f64>::new();
+    let main_stack = FunStack::new();
 
-    for token in tokens {
-        if let Ok(n) = token.parse::<f64>() {
-            main_stack = main_stack.push(n);
-        } else {
-            if main_stack.len() < 2 {
-                panic!("Invalid expression: not enough operands for '{}'", token);
-            }
+    let (result, stack) = expression.split_whitespace()
+        .fold(main_stack, |stack, token| reduce(stack, token))
+        .pop();
 
-            let (num1, stack1) = main_stack.pop();
-            let (num2, stack2) = stack1.pop();
-
-            let result = match token {
-                "+" => num2.unwrap() + num1.unwrap(),
-                "-" => num2.unwrap() - num1.unwrap(),
-                "*" => num2.unwrap() * num1.unwrap(),
-                "/" => {
-                    if num1.unwrap() == 0.0 {
-                        panic!("Invalid expression: division by zero");
-                    }
-                    num2.unwrap() / num1.unwrap()
-                },
-                _ => panic!("Invalid expression: Unexpected operation '{}'", token),
-            };
-            main_stack = stack2.push(result);
-        }
+    if stack.len() >= 1 {
+        panic!("Invalid expression: too many operands remaining");
     }
 
-    if main_stack.len() == 1 {
-        main_stack.pop().0.unwrap()
-    } else {
-        panic!("Invalid expression: too many operands remaining");
+    result.unwrap()
+}
+
+fn operations_map(op: &str) -> fn(f64, f64) -> f64 {
+    match op {
+        "+" => |x, y| x + y,
+        "-" => |x, y| x - y,
+        "*" => |x, y| x * y,
+        "/" => {
+            |x, y| {
+                if y == 0.0 { panic!("Invalid expression: division by zero") }
+                x / y
+            }
+        },
+        _ => panic!("Invalid expression: Unexpected operation '{}'", op)
     }
 }
 
+fn reduce(stack: FunStack<f64>, token: &str) -> FunStack<f64> {
+    if let Ok(n) = token.parse::<f64>() {
+        stack.push(n)
+    } else {
+        let op: fn(f64, f64) -> f64 = operations_map(token);
+
+        if stack.len() < 2 {
+            panic!("Invalid expression: not enough operands for '{}'", token);
+        }
+
+        let (num1, stack1) = stack.pop();
+        let (num2, stack2) = stack1.pop();
+        stack2.push(op(num2.unwrap(), num1.unwrap()))
+    }
+}
 
 #[cfg(test)]
 mod tests {
