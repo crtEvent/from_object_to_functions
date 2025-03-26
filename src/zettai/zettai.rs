@@ -63,6 +63,20 @@ mod tests {
         assert_eq!(list.items, food_to_buy);
     }
 
+    #[tokio::test]
+    #[should_panic]
+    async fn only_owners_can_see_their_lists() {
+        let owner = User { name: "frank".to_string() };
+        let another_user = User { name: "bob".to_string() };
+        let list_name = ListName { name: "shopping".to_string() };
+        let food_to_buy: Vec<ToDoItem> = vec!("carrots", "apples", "milk").into_iter()
+            .map(|item| ToDoItem { description: item.to_string() })
+            .collect();
+
+        start_the_application(&owner, &list_name, &food_to_buy);
+        let _list = get_to_do_list(&another_user, &list_name).await;
+    }
+
     async fn get_to_do_list(user: &User, list_name: &ListName) -> ToDoList {
         let client = Client::new();
         let url = format!("http://localhost:8081/todo/{}/{}", user.name, list_name.name);
