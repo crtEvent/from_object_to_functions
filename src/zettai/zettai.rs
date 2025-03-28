@@ -50,42 +50,67 @@ mod tests {
 
     #[tokio::test]
     async fn list_owners_can_see_their_lists() {
-        let user = User { name: "frank".to_string() };
-        let list_name = ListName { name: "shopping".to_string() };
-        let food_to_buy: Vec<ToDoItem> = vec!("carrots", "apples", "milk").into_iter()
-            .map(|item| ToDoItem { description: item.to_string() })
-            .collect();
+        let frank = ToDoListOwner { user: User { name: "frank".to_string() } };
+        let list_name = "shopping";
+        let food_to_buy = vec!("carrots", "apples", "milk");
 
-        start_the_application(&user, &list_name, &food_to_buy);
-        let list = get_to_do_list(&user, &list_name).await;
-
-        assert_eq!(list.list_name.name, list_name.name);
-        assert_eq!(list.items, food_to_buy);
+        start_the_application(&frank.user, &list_name, &food_to_buy);
+        frank.can_see_the_list(&list_name, &food_to_buy).await;
     }
 
     #[tokio::test]
     #[should_panic]
     async fn only_owners_can_see_their_lists() {
-        let owner = User { name: "frank".to_string() };
-        let another_user = User { name: "bob".to_string() };
-        let list_name = ListName { name: "shopping".to_string() };
-        let food_to_buy: Vec<ToDoItem> = vec!("carrots", "apples", "milk").into_iter()
-            .map(|item| ToDoItem { description: item.to_string() })
-            .collect();
+        let frank = ToDoListOwner { user: User { name: "frank".to_string() } };
+        let bob = ToDoListOwner { user: User { name: "bob".to_string() } };
+        let list_name = "shopping";
+        let food_to_buy = vec!("carrots", "apples", "milk");
 
-        start_the_application(&owner, &list_name, &food_to_buy);
-        let _list = get_to_do_list(&another_user, &list_name).await;
+        start_the_application(&frank.user, &list_name, &food_to_buy);
+        bob.can_see_the_list(&list_name, &food_to_buy).await;
     }
 
-    async fn get_to_do_list(user: &User, list_name: &ListName) -> ToDoList {
-        let client = Client::new();
-        let url = format!("http://localhost:8081/todo/{}/{}", user.name, list_name.name);
-        let response = client.get(&url).send().await.unwrap();
+    trait ScenarioActor {
+        fn user(&self) -> &User;
+    }
 
-        if response.status().is_success() {
-            parse_response(&response.text().await.unwrap())
-        } else {
-            panic!("Request failed: {}", response.status());
+    struct ToDoListOwner {
+        user: User,
+    }
+
+    impl ScenarioActor for ToDoListOwner {
+        fn user(&self) -> &User {
+            &self.user
+        }
+    }
+
+    impl ToDoListOwner {
+        pub async fn can_see_the_list(&self, list_name: &str, items: &Vec<&str>) {
+            let expected_list = create_list(list_name, items);
+            let list = self.get_to_do_list(list_name).await;
+            assert_eq!(list.list_name.name, expected_list.list_name.name);
+            assert_eq!(list.items, expected_list.items);
+        }
+
+        async fn get_to_do_list(&self, list_name: &str) -> ToDoList {
+            let client = Client::new();
+            let url = format!("http://localhost:8081/todo/{}/{}", self.user.name, list_name);
+            let response = client.get(&url).send().await.unwrap();
+
+            if response.status().is_success() {
+                parse_response(&response.text().await.unwrap())
+            } else {
+                panic!("Request failed: {}", response.status());
+            }
+        }
+    }
+
+    fn create_list(list_name: &str, items: &Vec<&str>) -> ToDoList {
+        ToDoList {
+            list_name:  ListName { name: list_name.to_string() },
+            items: items.into_iter()
+                .map(|item| ToDoItem { description: item.to_string() })
+                .collect(),
         }
     }
 
@@ -106,11 +131,8 @@ mod tests {
             .unwrap_or_default()
     }
 
-    fn start_the_application(user: &User, list_name: &ListName, items: &Vec<ToDoItem>) {
-        let to_do_list = ToDoList {
-            list_name: list_name.clone(),
-            items: items.clone(),
-        };
+    fn start_the_application(user: &User, list_name: &str, items: &Vec<&str>) {
+        let to_do_list = create_list(list_name, items);
         let mut lists = HashMap::new();
         lists.insert(user.clone(), vec![to_do_list]);
 
