@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToDoList {
     pub list_name: ListName,
     pub items: Vec<ToDoItem>,
