@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::exercises::ch02::prac2_2::FunStack;
 
 pub fn calc_rpn(expression: &str) -> f64 {

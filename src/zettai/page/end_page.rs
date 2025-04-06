@@ -1,4 +1,6 @@
-pub fn end_page() -> String {
+use axum::response::Html;
+
+pub fn end_page() -> Html<String> {
     let html = r#"
     <html>
         <body>
@@ -6,5 +8,6 @@ pub fn end_page() -> String {
         </body>
     </html>
     "#.to_string();
-    html
+
+    Html(html)
 }

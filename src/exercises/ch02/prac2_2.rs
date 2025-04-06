@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 pub struct FunStack<T> {
     data: *mut T,
     capacity: usize,

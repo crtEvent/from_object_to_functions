@@ -18,6 +18,6 @@ async fn main() {
     lists.insert(User { name: "ape".to_string() }, vec![to_do_list]);
 
     let app = Zettai::new(lists);
-    println!("Server started at http://localhost:8080/todo/ape/book");
     app.serve(8080).await;
+    println!("Server started at http://localhost:8080/todo/ape/book");
 }
