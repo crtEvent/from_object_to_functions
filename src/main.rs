@@ -2,8 +2,10 @@ mod exercises;
 mod zettai;
 
 use std::collections::HashMap;
-use crate::zettai::domain::{ListName, ToDoItem, ToDoList, User};
+use std::sync::{Arc, Mutex};
 use crate::zettai::zettai::Zettai;
+use crate::zettai::business::domain::{ListName, ToDoItem, ToDoList, User};
+use crate::zettai::business::zettai_hub::ToDoListHub;
 
 #[tokio::main]
 async fn main() {
@@ -17,7 +19,9 @@ async fn main() {
     let mut lists: HashMap<User, Vec<ToDoList>> = HashMap::new();
     lists.insert(User { name: "ape".to_string() }, vec![to_do_list]);
 
-    let app = Zettai::new(lists);
-    app.serve(8080).await;
+    let hub = ToDoListHub::new(lists);
+
+    let app = Zettai::new(Arc::new(Mutex::new(hub)));
     println!("Server started at http://localhost:8080/todo/ape/book");
+    app.serve(8080).await;
 }

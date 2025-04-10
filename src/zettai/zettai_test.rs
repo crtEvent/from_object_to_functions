@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::panic;
+use std::sync::{Arc, Mutex};
 use regex::Regex;
 use reqwest::Client;
-use crate::zettai::domain::{ListName, ToDoItem, ToDoList, User};
 use crate::zettai::zettai::Zettai;
+use crate::zettai::business::domain::{ListName, ToDoItem, ToDoList, User};
+use crate::zettai::business::zettai_hub::ToDoListHub;
 
 // Application For Acceptance Test
 struct AppForAT {
@@ -50,7 +52,8 @@ impl AppForAT {
     }
 
     fn start_the_application(&self, lists: HashMap<User, Vec<ToDoList>>) {
-        let app = Zettai::new(lists);
+        let hub = ToDoListHub::new(lists);
+        let app = Zettai::new(Arc::new(Mutex::new(hub)));
         tokio::spawn(async move {
             app.serve(8081u16).await;
         });

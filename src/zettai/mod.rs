@@ -1,6 +1,10 @@
 pub mod zettai;
-pub mod domain;
 mod zettai_test;
+
+pub mod business {
+    pub mod domain;
+    pub mod zettai_hub;
+}
 
 pub mod page {
     pub mod end_page;
