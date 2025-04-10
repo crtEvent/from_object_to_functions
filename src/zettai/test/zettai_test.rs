@@ -3,14 +3,15 @@ use std::panic;
 use std::sync::{Arc, Mutex};
 use regex::Regex;
 use reqwest::Client;
+use tokio::sync::OnceCell;
 use crate::zettai::zettai::Zettai;
 use crate::zettai::business::domain::{ListName, ToDoItem, ToDoList, User};
 use crate::zettai::business::zettai_hub::ToDoListHub;
 
-// Application For Acceptance Test
-struct AppForAT {
+static SINGLE_SERVER_HANDLER: OnceCell<()> = OnceCell::const_new();
 
-}
+// Application For Acceptance Test
+struct AppForAT {}
 
 impl AppForAT {
     async fn get_to_do_list(&self, user: &User, list_name: &str) -> ToDoList {
@@ -25,15 +26,6 @@ impl AppForAT {
         }
     }
 
-    fn create_list(&self, list_name: &str, items: &[&str]) -> ToDoList {
-        ToDoList {
-            list_name:  ListName { name: list_name.to_string() },
-            items: items.into_iter()
-                .map(|item| ToDoItem { description: item.to_string() })
-                .collect(),
-        }
-    }
-
     fn parse_response(html: &str) -> ToDoList {
         let name_regex = Regex::new("<h2>(.*?)<").unwrap();
         let list_name = Self::extract_list_name(&name_regex, html);
@@ -42,7 +34,7 @@ impl AppForAT {
             .map(|cap| ToDoItem { description: cap[1].to_string() })
             .collect();
 
-        ToDoList { list_name: ListName{ name: list_name }, items }
+        ToDoList { list_name: ListName { name: list_name }, items }
     }
 
     fn extract_list_name(name_regex: &Regex, html: &str) -> String {
@@ -51,12 +43,19 @@ impl AppForAT {
             .unwrap_or_default()
     }
 
-    fn start_the_application(&self, lists: HashMap<User, Vec<ToDoList>>) {
-        let hub = ToDoListHub::new(lists);
-        let app = Zettai::new(Arc::new(Mutex::new(hub)));
-        tokio::spawn(async move {
-            app.serve(8081u16).await;
-        });
+    async fn start_the_application(&self, lists: HashMap<User, Vec<ToDoList>>) {
+        SINGLE_SERVER_HANDLER
+            .get_or_init(|| async {
+                let hub = ToDoListHub::new(lists);
+                let app = Zettai::new(Arc::new(Mutex::new(hub)));
+
+                tokio::spawn(async move {
+                    app.serve(8081u16).await;
+                });
+
+                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            })
+            .await;
     }
 }
 
@@ -65,6 +64,10 @@ struct ToDoListOwner {
 }
 
 impl ToDoListOwner {
+    fn new(user_name: &str) -> Self {
+        ToDoListOwner { user_name: user_name.to_string() }
+    }
+
     fn user(&self) -> User {
         User { name: self.user_name.clone() }
     }
@@ -78,43 +81,44 @@ impl ToDoListOwner {
 
 #[cfg(test)]
 mod tests {
+    use once_cell::sync::Lazy;
     use super::*;
+
+    static FRANK: Lazy<ToDoListOwner> = Lazy::new(||
+        ToDoListOwner::new("frank"));
+    static FRANK_LIST: Lazy<ToDoList> = Lazy::new(||
+        ToDoList::new(
+            "shopping",
+            vec!("carrots", "apples", "milk")
+        ));
+    static BOB: Lazy<ToDoListOwner> = Lazy::new(||
+        ToDoListOwner::new("bob"));
+    static BOB_LIST: Lazy<ToDoList> = Lazy::new(||
+        ToDoList::new(
+            "gardening",
+            vec!("fix the fence", "mowing the lawn",)
+        ));
+    static MAP: Lazy<HashMap<User, Vec<ToDoList>>> = Lazy::new(||
+        HashMap::from([
+            (FRANK.user(), Vec::from([FRANK_LIST.clone()])),
+            (BOB.user(), Vec::from([BOB_LIST.clone()])),
+        ]));
+
 
     #[tokio::test]
     async fn list_owners_can_see_their_lists() {
-        let app = AppForAT{};
-        let frank = ToDoListOwner { user_name: "frank".to_string() };
-        let frank_list = app.create_list(
-            "shopping",
-            &vec!("carrots", "apples", "milk")
-        );
+        let app = AppForAT {};
+        app.start_the_application(MAP.clone()).await;
 
-        let map: HashMap<User, Vec<ToDoList>> = HashMap::from([
-            (frank.user(), Vec::from([frank_list.clone()])),
-        ]);
-
-        app.start_the_application(map);
-        frank.can_see_the_list(&frank_list, &app).await;
+        FRANK.can_see_the_list(&FRANK_LIST, &app).await;
     }
 
     #[tokio::test]
     #[should_panic]
     async fn only_owners_can_see_their_lists() {
-        let app = AppForAT{};
-        let frank = ToDoListOwner { user_name: "frank".to_string() };
-        let frank_list = app.create_list(
-            "shopping",
-            &vec!("carrots", "apples", "milk")
-        );
-        let bob = ToDoListOwner { user_name: "bob".to_string() };
+        let app = AppForAT {};
+        app.start_the_application(MAP.clone()).await;
 
-        let map: HashMap<User, Vec<ToDoList>> = HashMap::from([
-            (frank.user(), Vec::from([frank_list.clone()])),
-            (bob.user(), Vec::from([])),
-        ]);
-
-        app.start_the_application(map);
-        bob.can_see_the_list(&frank_list, &app).await;
+        BOB.can_see_the_list(&FRANK_LIST, &app).await;
     }
-
 }
