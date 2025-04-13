@@ -1,8 +1,11 @@
 use std::collections::HashMap;
-use crate::zettai::business::domain::{ListName, ToDoList, User};
+use crate::zettai::business::domain::{ListName, ToDoItem, ToDoList, User};
 
 pub trait ZettaiHub: Send + Sync {
     fn get_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList>;
+    fn add_item_to_list(
+        &mut self, user: &User, list_name: &ListName, item: &ToDoItem,
+    ) -> Result<(), String>;
 }
 
 pub struct ToDoListHub {
@@ -11,7 +14,7 @@ pub struct ToDoListHub {
 
 impl ToDoListHub {
     pub fn new(lists: HashMap<User, Vec<ToDoList>>) -> Self {
-        ToDoListHub { lists, }
+        ToDoListHub { lists }
     }
 }
 
@@ -25,5 +28,22 @@ impl ZettaiHub for ToDoListHub {
                         &list.list_name.name == &list_name.name
                     )
             )
+    }
+
+    fn add_item_to_list(
+        &mut self, user: &User, list_name: &ListName, item: &ToDoItem
+    ) -> Result<(), String> {
+        match self.lists.get_mut(user) {
+            Some(lists) => {
+                match lists.iter_mut().find(|list| &list.list_name == list_name) {
+                    Some(list) => {
+                        list.items.push(item.clone());
+                        Ok(())
+                    },
+                    None => Err(format!("List '{}' not found", list_name.name))
+                }
+            }
+            None => Err(format!("User '{}' not found", user.name))
+        }
     }
 }

@@ -6,8 +6,10 @@ pub mod business {
 }
 
 pub mod page {
+    pub mod dto;
     pub mod end_page;
     pub mod show_list_page;
+    pub mod add_new_item;
 }
 
 mod test;
