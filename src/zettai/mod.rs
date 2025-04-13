@@ -10,6 +10,4 @@ pub mod page {
     pub mod show_list_page;
 }
 
-pub mod test {
-    mod zettai_test;
-}
+mod test;
