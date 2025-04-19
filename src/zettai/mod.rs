@@ -3,6 +3,7 @@ pub mod zettai;
 pub mod business {
     pub mod domain;
     pub mod zettai_hub;
+    pub mod todolist_fetcher;
 }
 
 pub mod page {

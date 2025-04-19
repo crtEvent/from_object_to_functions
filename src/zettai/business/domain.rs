@@ -16,7 +16,7 @@ impl ToDoList {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct ListName {
     pub name: String,
 }

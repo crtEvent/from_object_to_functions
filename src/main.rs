@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use crate::zettai::zettai::Zettai;
 use crate::zettai::business::domain::{ToDoList, User};
+use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
 use crate::zettai::business::zettai_hub::ToDoListHub;
 
 #[tokio::main]
@@ -16,10 +17,12 @@ async fn main() {
     );
 
     let lists = HashMap::from([
-        (ape, Vec::from([ape_list])),
+        (ape, HashMap::from([(ape_list.list_name.clone(), ape_list.clone())])),
     ]);
 
-    let hub = ToDoListHub::new(lists);
+    let fetcher = ToDoListFetcherFromMap::new(lists);
+
+    let hub = ToDoListHub::new(fetcher);
 
     let app = Zettai::new(Arc::new(Mutex::new(hub)));
     println!("Server started at http://localhost:8080/todo/ape/book");
