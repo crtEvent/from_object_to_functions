@@ -2,7 +2,8 @@ use std::sync::{Arc, Mutex};
 use axum::extract::Path;
 use axum::Form;
 use axum::response::{IntoResponse, Redirect, Response};
-use crate::zettai::business::domain::{ListName, ToDoItem, User};
+use chrono::{Local, NaiveDate};
+use crate::zettai::business::domain::{ListName, ToDoItem, ToDoStatus, User};
 use crate::zettai::business::zettai_hub::ZettaiHub;
 use crate::zettai::page::dto::AddItemRequest;
 
@@ -13,7 +14,14 @@ pub fn add_new_item(
 ) -> Response {
     let user = User { name: user_name.to_string() };
     let list_name = ListName { name: list_name.to_string() };
-    let item = ToDoItem { description: dto.item_name };
+    let due_date = NaiveDate::parse_from_str(&*dto.due_date, "%Y-%m-%d")
+        .unwrap_or_else(|_| Local::now().date_naive());
+
+    let item = ToDoItem {
+        description: dto.item_name,
+        due_date,
+        state: ToDoStatus::from_str(&*dto.status),
+    };
 
     hub.lock().unwrap().add_item_to_list(&user, &list_name, &item);
 

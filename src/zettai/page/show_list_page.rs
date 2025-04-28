@@ -47,7 +47,10 @@ fn render_html(todo_list: &ToDoList) -> Html<String> {
 
 fn render_items_to_html(items: &Vec<ToDoItem>) -> String {
     items.iter()
-        .map(|item| format!(r#"<tr><td>{}</td></tr>"#, item.description))
+        .map(|item|
+            format!(r#"<tr><td>{}</td><td>{}</td><td>{}</td></tr>"#,
+                    item.description, item.due_date, item.state.as_str())
+        )
         .collect::<Vec<_>>()
         .join("")
 }

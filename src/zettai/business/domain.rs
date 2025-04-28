@@ -1,5 +1,6 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
+use chrono::{Local, NaiveDate};
 
 const URL_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"^[A-Za-z0-9-]+$").unwrap()
@@ -16,7 +17,11 @@ impl ToDoList {
             list_name: ListName { name: list_name.to_string() },
             items: items.into_iter()
                 .map(|item|
-                    ToDoItem { description: item.to_string() }
+                    ToDoItem {
+                        description: item.to_string(),
+                        due_date: Local::now().date_naive(),
+                        state: ToDoStatus::Todo,
+                    }
                 )
                 .collect()
         }
@@ -49,15 +54,38 @@ pub struct User {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToDoItem {
     pub description: String,
+    pub due_date: NaiveDate,
+    pub state: ToDoStatus,
 }
 
-// #[derive(Debug, Clone, Copy)]
-// pub enum ToDoStatus {
-//     Todo,
-//     InProgress,
-//     Done,
-//     Blocked,
-// }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ToDoStatus {
+    Todo,
+    InProgress,
+    Done,
+    Blocked,
+}
+
+impl ToDoStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ToDoStatus::Todo => "Todo",
+            ToDoStatus::InProgress => "InProgress",
+            ToDoStatus::Done => "Done",
+            ToDoStatus::Blocked => "Blocked",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Self {
+        match s.to_lowercase().as_str() {
+            "todo" => ToDoStatus::Todo,
+            "inprogress" => ToDoStatus::InProgress,
+            "done" => ToDoStatus::Done,
+            "blocked" => ToDoStatus::Blocked,
+            _ => ToDoStatus::Todo,
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
