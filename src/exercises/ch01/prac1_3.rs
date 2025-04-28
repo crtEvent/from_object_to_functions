@@ -2,15 +2,15 @@
 
 #[cfg(test)]
 mod tests {
+    use rand::prelude::ThreadRng;
     use rand::Rng;
     use std::cmp::{max, min};
-    use rand::prelude::ThreadRng;
 
     #[test]
     fn test_add_two_numbers() {
-        assert_eq!(5+6, 11);
-        assert_eq!(7+42, 49);
-        assert_eq!(999+1, 1000);
+        assert_eq!(5 + 6, 11);
+        assert_eq!(7 + 42, 49);
+        assert_eq!(999 + 1, 1000);
         // 이런 테스트를 얼마나 많이 해야 안심할 수 있을까? 모든 수를 테스트할 순 없다
     }
 
@@ -55,9 +55,9 @@ mod tests {
             let y = random_natural(&mut rng);
             let z = random_natural(&mut rng);
 
-            assert_eq!((x + y)  + z, x + (y + z));
-            assert_eq!((y + z)  + x, y + (z + x));
-            assert_eq!((z + x)  + y, z + (x + y));
+            assert_eq!((x + y) + z, x + (y + z));
+            assert_eq!((y + z) + x, y + (z + x));
+            assert_eq!((z + x) + y, z + (x + y));
         }
     }
 

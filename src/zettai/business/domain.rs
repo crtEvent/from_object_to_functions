@@ -1,10 +1,8 @@
+use chrono::{Local, NaiveDate};
 use once_cell::sync::Lazy;
 use regex::Regex;
-use chrono::{Local, NaiveDate};
 
-const URL_REGEX: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"^[A-Za-z0-9-]+$").unwrap()
-});
+const URL_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[A-Za-z0-9-]+$").unwrap());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToDoList {
@@ -14,16 +12,17 @@ pub struct ToDoList {
 impl ToDoList {
     pub fn new(list_name: &str, items: Vec<&str>) -> Self {
         ToDoList {
-            list_name: ListName { name: list_name.to_string() },
-            items: items.into_iter()
-                .map(|item|
-                    ToDoItem {
-                        description: item.to_string(),
-                        due_date: Local::now().date_naive(),
-                        state: ToDoStatus::Todo,
-                    }
-                )
-                .collect()
+            list_name: ListName {
+                name: list_name.to_string(),
+            },
+            items: items
+                .into_iter()
+                .map(|item| ToDoItem {
+                    description: item.to_string(),
+                    due_date: Local::now().date_naive(),
+                    state: ToDoStatus::Todo,
+                })
+                .collect(),
         }
     }
 }
@@ -35,11 +34,15 @@ pub struct ListName {
 
 impl ListName {
     fn from_trusted(name: &str) -> Self {
-        ListName { name: name.to_string() }
+        ListName {
+            name: name.to_string(),
+        }
     }
     fn from_untrusted(name: &str) -> Option<Self> {
         if URL_REGEX.is_match(name) && (1..=40).contains(&name.len()) {
-            Some(ListName { name: name.to_string() })
+            Some(ListName {
+                name: name.to_string(),
+            })
         } else {
             None
         }
@@ -89,21 +92,18 @@ impl ToDoStatus {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use once_cell::sync::Lazy;
-    use rand::{rng, Rng};
     use rand::rngs::ThreadRng;
     use rand::seq::IndexedRandom;
-    use super::*;
+    use rand::{rng, Rng};
 
     const UPPER_CASE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const LOWER_CASE: &str = "abcdefghijklmnopqrstuvwxyz";
     const DIGITS: &str = "0123456789";
-    const VALID_CHARSET: Lazy<String> = Lazy::new(|| {
-        format!("{}{}{}", UPPER_CASE, LOWER_CASE, DIGITS)
-    });
-    const INVALID_CHARSET: Lazy<String> = Lazy::new(|| {
-        " !@#$%^&*()_+={}[]|:;'<>,./?".to_string()
-    });
+    const VALID_CHARSET: Lazy<String> =
+        Lazy::new(|| format!("{}{}{}", UPPER_CASE, LOWER_CASE, DIGITS));
+    const INVALID_CHARSET: Lazy<String> = Lazy::new(|| " !@#$%^&*()_+={}[]|:;'<>,./?".to_string());
 
     #[test]
     fn valid_names_are_alphanumeric_hyphen_between_3_and_40_chars_length() {
@@ -131,12 +131,9 @@ mod tests {
         for _ in 0..100 {
             let random_name: String = substitute_random_char(
                 &random_string_generator(&VALID_CHARSET, 3, 40),
-                &INVALID_CHARSET
+                &INVALID_CHARSET,
             );
-            assert_eq!(
-                ListName::from_untrusted(&random_name),
-                None
-            );
+            assert_eq!(ListName::from_untrusted(&random_name), None);
         }
     }
 
@@ -149,12 +146,7 @@ mod tests {
         };
 
         (0..string_length)
-            .map(|_| {
-                *char_set
-                    .as_bytes()
-                    .choose(&mut rng)
-                    .unwrap() as char
-            })
+            .map(|_| *char_set.as_bytes().choose(&mut rng).unwrap() as char)
             .collect()
     }
 

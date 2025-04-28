@@ -5,7 +5,8 @@ use crate::exercises::ch02::prac2_2::FunStack;
 pub fn calc_rpn(expression: &str) -> f64 {
     let main_stack = FunStack::new();
 
-    let (result, stack) = expression.split_whitespace()
+    let (result, stack) = expression
+        .split_whitespace()
         .fold(main_stack, |stack, token| reduce(stack, token))
         .pop();
 
@@ -21,13 +22,13 @@ fn operations_map(op: &str) -> fn(f64, f64) -> f64 {
         "+" => |x, y| x + y,
         "-" => |x, y| x - y,
         "*" => |x, y| x * y,
-        "/" => {
-            |x, y| {
-                if y == 0.0 { panic!("Invalid expression: division by zero") }
-                x / y
+        "/" => |x, y| {
+            if y == 0.0 {
+                panic!("Invalid expression: division by zero")
             }
+            x / y
         },
-        _ => panic!("Invalid expression: Unexpected operation '{}'", op)
+        _ => panic!("Invalid expression: Unexpected operation '{}'", op),
     }
 }
 

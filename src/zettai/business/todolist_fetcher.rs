@@ -1,9 +1,9 @@
-use std::collections::HashMap;
 use crate::zettai::business::domain::{ListName, ToDoList, User};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct ToDoListFetcherFromMap {
-    store: HashMap<User, HashMap<ListName, ToDoList>>
+    store: HashMap<User, HashMap<ListName, ToDoList>>,
 }
 
 impl ToDoListFetcherFromMap {
@@ -11,15 +11,11 @@ impl ToDoListFetcherFromMap {
         ToDoListFetcherFromMap { store }
     }
 
-    pub fn invoke(
-        &self, user: &User, list_name: &ListName
-    ) -> Option<&ToDoList> {
+    pub fn invoke(&self, user: &User, list_name: &ListName) -> Option<&ToDoList> {
         self.store.get(user)?.get(list_name)
     }
 
-    pub fn assign_list_to_user(
-        &mut self, user: &User, list: &ToDoList
-    ) {
+    pub fn assign_list_to_user(&mut self, user: &User, list: &ToDoList) {
         self.store
             .entry(user.clone())
             .and_modify(|list_map| {

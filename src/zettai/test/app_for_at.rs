@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use chrono::{Local, NaiveDate};
-use regex::Regex;
-use reqwest::Client;
 use crate::zettai::business::domain::{ListName, ToDoItem, ToDoList, ToDoStatus, User};
 use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
 use crate::zettai::business::zettai_hub::ToDoListHub;
 use crate::zettai::zettai::Zettai;
+use chrono::{Local, NaiveDate};
+use regex::Regex;
+use reqwest::Client;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 // Application For Acceptance Test
 #[allow(dead_code)]
@@ -30,16 +30,12 @@ impl AppForAT {
         let client = Client::new();
         let url = format!("http://localhost:8081/todo/{}/{}", user.name, list_name);
         let due_date = Local::now().date_naive().to_string();
-        let form: HashMap<&str, &str> = HashMap::from(
-            [
-                    ("item_name", item),
-                    ("due_date", &due_date),
-                    ("status", "Todo")
-            ]
-        );
-        client.post(&url)
-            .form(&form)
-            .send().await.unwrap();
+        let form: HashMap<&str, &str> = HashMap::from([
+            ("item_name", item),
+            ("due_date", &due_date),
+            ("status", "Todo"),
+        ]);
+        client.post(&url).form(&form).send().await.unwrap();
     }
 
     fn parse_response(html: &str) -> ToDoList {
@@ -50,21 +46,25 @@ impl AppForAT {
 
         let mut items = Vec::new();
 
-        while let (Some(cap1), Some(cap2), Some(cap3)) = (caps_iter.next(), caps_iter.next(), caps_iter.next()) {
-            items.push(
-                ToDoItem {
-                    description: cap1[1].to_string(),
-                    due_date: NaiveDate::parse_from_str(&*cap2[1].to_string(), "%Y-%m-%d").unwrap(),
-                    state: ToDoStatus::from_str(&*cap3[1].to_string())
-                }
-            );
+        while let (Some(cap1), Some(cap2), Some(cap3)) =
+            (caps_iter.next(), caps_iter.next(), caps_iter.next())
+        {
+            items.push(ToDoItem {
+                description: cap1[1].to_string(),
+                due_date: NaiveDate::parse_from_str(&*cap2[1].to_string(), "%Y-%m-%d").unwrap(),
+                state: ToDoStatus::from_str(&*cap3[1].to_string()),
+            });
         }
 
-        ToDoList { list_name: ListName { name: list_name }, items }
+        ToDoList {
+            list_name: ListName { name: list_name },
+            items,
+        }
     }
 
     fn extract_list_name(name_regex: &Regex, html: &str) -> String {
-        name_regex.captures(html)
+        name_regex
+            .captures(html)
             .map(|cap| cap[1].to_string())
             .unwrap_or_default()
     }

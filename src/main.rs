@@ -1,24 +1,24 @@
 mod exercises;
 mod zettai;
 
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use crate::zettai::zettai::Zettai;
 use crate::zettai::business::domain::{ToDoList, User};
 use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
 use crate::zettai::business::zettai_hub::ToDoListHub;
+use crate::zettai::zettai::Zettai;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 #[tokio::main]
 async fn main() {
-    let ape = User { name: "ape".to_string() };
-    let ape_list = ToDoList::new(
-        "book",
-        vec!["write chapter", "insert code", "draw diagram"]
-    );
+    let ape = User {
+        name: "ape".to_string(),
+    };
+    let ape_list = ToDoList::new("book", vec!["write chapter", "insert code", "draw diagram"]);
 
-    let lists = HashMap::from([
-        (ape, HashMap::from([(ape_list.list_name.clone(), ape_list.clone())])),
-    ]);
+    let lists = HashMap::from([(
+        ape,
+        HashMap::from([(ape_list.list_name.clone(), ape_list.clone())]),
+    )]);
 
     let fetcher = ToDoListFetcherFromMap::new(lists);
 

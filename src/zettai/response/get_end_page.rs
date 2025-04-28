@@ -7,7 +7,8 @@ pub fn end_page() -> Html<String> {
             <h1 style="text-align:center; font-size:3em";>Hello Function World!</h1>
         </body>
     </html>
-    "#.to_string();
+    "#
+    .to_string();
 
     Html(html)
 }

@@ -12,7 +12,12 @@ trait TagExtension {
 
 impl TagExtension for &str {
     fn tag(self, value: &str) -> (String, StringTag) {
-        (self.to_string(), StringTag { text: value.to_string() })
+        (
+            self.to_string(),
+            StringTag {
+                text: value.to_string(),
+            },
+        )
     }
 }
 
@@ -24,9 +29,9 @@ fn render_template(template: &str, data: HashMap<String, StringTag>) -> String {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-    use indoc::indoc;
     use crate::exercises::ch03::prac3_4::{render_template, StringTag, TagExtension};
+    use indoc::indoc;
+    use std::collections::HashMap;
 
     #[test]
     fn test_template() {
