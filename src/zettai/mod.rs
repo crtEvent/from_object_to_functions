@@ -13,4 +13,9 @@ pub mod response {
     pub mod get_item_list_page;
 }
 
-mod test;
+mod test {
+    mod app_for_at;
+    mod todolist_owner;
+    mod test_get_item_list_page;
+    mod test_add_new_item;
+}
