@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
     use crate::zettai::business::domain::{ListName, ToDoList, User};
-    use std::collections::HashMap;
-    use once_cell::sync::Lazy;
     use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
-    use crate::zettai::test::app_for_at::AppForAT;
-    use crate::zettai::test::todolist_owner::ToDoListOwner;
+    use crate::zettai::test::tooling::app_for_at::AppForAT;
+    use crate::zettai::test::tooling::todolist_owner::ToDoListOwner;
+    use once_cell::sync::Lazy;
+    use std::collections::HashMap;
 
     static FRANK: Lazy<ToDoListOwner> = Lazy::new(|| ToDoListOwner::new("frank"));
     static FRANK_LIST: Lazy<ToDoList> =
@@ -35,7 +35,7 @@ mod tests {
         let app = AppForAT {};
         app.start_the_application(FETCHER.clone()).await;
 
-        FRANK.can_see_the_list(&FRANK_LIST, &app).await;
+        FRANK.can_see_the_item_list(&FRANK_LIST, &app).await;
     }
 
     #[tokio::test]
@@ -44,6 +44,6 @@ mod tests {
         let app = AppForAT {};
         app.start_the_application(FETCHER.clone()).await;
 
-        BOB.can_see_the_list(&FRANK_LIST, &app).await;
+        BOB.can_see_the_item_list(&FRANK_LIST, &app).await;
     }
 }

@@ -4,7 +4,7 @@ use axum::extract::Path;
 use axum::response::Html;
 use std::sync::{Arc, Mutex};
 
-pub fn get_item_list_page(
+pub fn get_todo_list(
     hub: Arc<Mutex<dyn ZettaiHub>>,
     Path((user_name, list_name)): Path<(String, String)>,
 ) -> Html<String> {
@@ -21,7 +21,7 @@ fn extract_list_data(user: String, list_name: String) -> (User, ListName) {
 fn fetch_list_content(hub: Arc<Mutex<dyn ZettaiHub>>, list_id: &(User, ListName)) -> ToDoList {
     hub.lock()
         .unwrap()
-        .get_list(&list_id.0, &list_id.1)
+        .get_todo_list(&list_id.0, &list_id.1)
         .cloned()
         .expect("List unknown")
 }

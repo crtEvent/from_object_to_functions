@@ -3,7 +3,7 @@ use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
 use std::iter::once;
 
 pub trait ZettaiHub: Send + Sync {
-    fn get_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList>;
+    fn get_todo_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList>;
     fn add_item_to_list(&mut self, user: &User, list_name: &ListName, item: &ToDoItem);
 }
 
@@ -26,7 +26,7 @@ impl ToDoListHub {
 }
 
 impl ZettaiHub for ToDoListHub {
-    fn get_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList> {
+    fn get_todo_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList> {
         self.fetcher.invoke(user, list_name)
     }
 

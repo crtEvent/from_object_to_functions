@@ -9,13 +9,20 @@ pub mod business {
 pub mod response {
     pub mod add_new_item;
     pub mod dto;
+    pub mod get_all_todo_lists;
     pub mod get_end_page;
-    pub mod get_item_list_page;
+    pub mod get_todo_list;
 }
 
 mod test {
-    mod app_for_at;
-    mod todolist_owner;
-    mod test_get_item_list_page;
+    mod tooling {
+        pub(crate) mod app_for_at;
+        pub(crate) mod todolist_owner;
+        mod parser {
+            pub(crate) mod get_todo_list_parser;
+        }
+    }
     mod test_add_new_item;
+    mod test_get_all_todo_lists;
+    mod test_get_todo_list;
 }
