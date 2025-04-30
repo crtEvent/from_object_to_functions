@@ -27,18 +27,18 @@ impl ToDoList {
     }
 }
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ListName {
     pub name: String,
 }
 
 impl ListName {
-    fn from_trusted(name: &str) -> Self {
+    pub fn from_trusted(name: &str) -> Self {
         ListName {
             name: name.to_string(),
         }
     }
-    fn from_untrusted(name: &str) -> Option<Self> {
+    pub fn from_untrusted(name: &str) -> Option<Self> {
         if URL_REGEX.is_match(name) && (1..=40).contains(&name.len()) {
             Some(ListName {
                 name: name.to_string(),

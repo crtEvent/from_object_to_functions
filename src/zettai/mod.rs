@@ -19,6 +19,7 @@ mod test {
         pub(crate) mod app_for_at;
         pub(crate) mod todolist_owner;
         mod parser {
+            pub(crate) mod get_all_todo_lists_parser;
             pub(crate) mod get_todo_list_parser;
         }
     }

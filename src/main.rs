@@ -13,11 +13,15 @@ async fn main() {
     let ape = User {
         name: "ape".to_string(),
     };
-    let ape_list = ToDoList::new("book", vec!["write chapter", "insert code", "draw diagram"]);
+    let ape_list_book = ToDoList::new("book", vec!["write chapter", "insert code", "draw diagram"]);
+    let ape_list_work = ToDoList::new("work", vec!["meeting", "spreadsheet"]);
 
     let lists = HashMap::from([(
         ape,
-        HashMap::from([(ape_list.list_name.clone(), ape_list.clone())]),
+        HashMap::from([
+            (ape_list_book.list_name.clone(), ape_list_book.clone()),
+            (ape_list_work.list_name.clone(), ape_list_work.clone()),
+        ]),
     )]);
 
     let fetcher = ToDoListFetcherFromMap::new(lists);

@@ -35,7 +35,7 @@ mod tests {
         let app = AppForAT {};
         app.start_the_application(FETCHER.clone()).await;
 
-        FRANK.can_see_the_item_list(&FRANK_LIST, &app).await;
+        FRANK.can_see_the_todo_list(&FRANK_LIST, &app).await;
     }
 
     #[tokio::test]
@@ -44,6 +44,6 @@ mod tests {
         let app = AppForAT {};
         app.start_the_application(FETCHER.clone()).await;
 
-        BOB.can_see_the_item_list(&FRANK_LIST, &app).await;
+        BOB.can_see_the_todo_list(&FRANK_LIST, &app).await;
     }
 }

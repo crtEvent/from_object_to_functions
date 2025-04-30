@@ -1,6 +1,7 @@
-use crate::zettai::business::domain::{ToDoList, User};
+use crate::zettai::business::domain::{ListName, ToDoList, User};
 use crate::zettai::business::todolist_fetcher::ToDoListFetcherFromMap;
 use crate::zettai::business::zettai_hub::ToDoListHub;
+use crate::zettai::test::tooling::parser::get_all_todo_lists_parser;
 use crate::zettai::test::tooling::parser::get_todo_list_parser;
 use crate::zettai::zettai::Zettai;
 use chrono::Local;
@@ -21,6 +22,18 @@ impl AppForAT {
 
         if response.status().is_success() {
             get_todo_list_parser::parse_response(&response.text().await.unwrap())
+        } else {
+            std::panic!("{}", response.text().await.unwrap());
+        }
+    }
+
+    pub(crate) async fn get_all_todo_lists(&self, user: &User) -> Vec<ListName> {
+        let client = Client::new();
+        let url = format!("http://localhost:8081/todo/{}", user.name);
+        let response = client.get(&url).send().await.unwrap();
+
+        if response.status().is_success() {
+            get_all_todo_lists_parser::parse_response(&response.text().await.unwrap())
         } else {
             std::panic!("{}", response.text().await.unwrap());
         }

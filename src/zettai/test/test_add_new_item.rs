@@ -25,13 +25,13 @@ mod tests {
         let app = AppForAT {};
         app.start_the_application(FETCHER.clone()).await;
 
-        ANN.can_add_item_to_item_list("paint the shelf", "diy", &app)
+        ANN.can_add_item_to_todo_list("paint the shelf", "diy", &app)
             .await;
-        ANN.can_add_item_to_item_list("fix the gate", "diy", &app)
+        ANN.can_add_item_to_todo_list("fix the gate", "diy", &app)
             .await;
-        ANN.can_add_item_to_item_list("change the lock", "diy", &app)
+        ANN.can_add_item_to_todo_list("change the lock", "diy", &app)
             .await;
-        ANN.can_see_the_item_list(
+        ANN.can_see_the_todo_list(
             &ToDoList::new(
                 "diy",
                 vec!["paint the shelf", "fix the gate", "change the lock"],

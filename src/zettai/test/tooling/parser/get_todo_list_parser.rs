@@ -3,8 +3,24 @@ use chrono::NaiveDate;
 use regex::Regex;
 
 pub(crate) fn parse_response(html: &str) -> ToDoList {
+    let list_name = extract_list_name(html);
+    let items = extract_todo_items(html);
+
+    ToDoList {
+        list_name: ListName { name: list_name },
+        items,
+    }
+}
+
+fn extract_list_name(html: &str) -> String {
     let name_regex = Regex::new("<h2>(.*?)<").unwrap();
-    let list_name = extract_list_name(&name_regex, html);
+    name_regex
+        .captures(html)
+        .map(|cap| cap[1].to_string())
+        .unwrap_or_default()
+}
+
+fn extract_todo_items(html: &str) -> Vec<ToDoItem> {
     let items_td_regex = Regex::new("<td>(.*?)<").unwrap();
     let mut caps_iter = items_td_regex.captures_iter(html);
 
@@ -20,15 +36,5 @@ pub(crate) fn parse_response(html: &str) -> ToDoList {
         });
     }
 
-    ToDoList {
-        list_name: ListName { name: list_name },
-        items,
-    }
-}
-
-fn extract_list_name(name_regex: &Regex, html: &str) -> String {
-    name_regex
-        .captures(html)
-        .map(|cap| cap[1].to_string())
-        .unwrap_or_default()
+    items
 }
