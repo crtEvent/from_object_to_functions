@@ -19,4 +19,5 @@ mod ch04 {
 
 mod ch05 {
     mod prac5_1;
+    mod prac5_2;
 }
