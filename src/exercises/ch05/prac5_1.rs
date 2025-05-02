@@ -21,17 +21,14 @@ impl Collatz for i32 {
         Self::collatz_recursive(self, vec![self])
     }
 
-    fn collatz_recursive(x: i32, acc: Vec<i32>) -> Vec<i32> {
-        if x == 1 {
-            acc
-        } else if x % 2 == 0 {
-            let num = x / 2;
-            let list = acc.iter().cloned().chain(std::iter::once(num)).collect();
-            Self::collatz_recursive(num, list)
-        } else {
-            let num = (x * 3) + 1;
-            let list = acc.iter().cloned().chain(std::iter::once(num)).collect();
-            Self::collatz_recursive(num, list)
+    fn collatz_recursive(x: i32, mut acc: Vec<i32>) -> Vec<i32> {
+        match x {
+            1 => acc,
+            _ => {
+                let next = if x % 2 == 0 { x / 2 } else { x * 3 + 1 };
+                acc.push(next);
+                Self::collatz_recursive(next, acc)
+            },
         }
     }
 }
