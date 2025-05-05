@@ -28,7 +28,7 @@ fn fetch_lists_content(hub: Arc<Mutex<dyn ZettaiHub>>, user: &User) -> Vec<ToDoL
 }
 
 fn render_html(user: &User, todo_lists: &Vec<ToDoList>) -> Html<String> {
-    let lists_html = render_lists_to_html(todo_lists);
+    let lists_html = render_lists_to_html(user, todo_lists);
     let html = format!(
         r#"
             <html>
@@ -47,6 +47,14 @@ fn render_html(user: &User, todo_lists: &Vec<ToDoList>) -> Html<String> {
                     <input type="submit" value="Submit">
                 </form>
             </html>
+            <script>
+                document.querySelectorAll('tr[data-href]').forEach(tr => {{
+                    tr.addEventListener('click', () => {{
+                        window.location.href = tr.dataset.href;
+                    }});
+                    tr.style.cursor = 'pointer';
+                }});
+            </script>
             "#,
         user.name, lists_html, user.name
     );
@@ -54,10 +62,15 @@ fn render_html(user: &User, todo_lists: &Vec<ToDoList>) -> Html<String> {
     Html(html)
 }
 
-fn render_lists_to_html(todo_lists: &Vec<ToDoList>) -> String {
+fn render_lists_to_html(user: &User, todo_lists: &Vec<ToDoList>) -> String {
     todo_lists
         .iter()
-        .map(|todo| format!(r#"<tr><td>{}</td></tr>"#, todo.list_name.name))
+        .map(|todo| {
+            format!(
+                r#"<tr data-href="/todo/{}/{}"><td>{}</td></tr>"#,
+                user.name, todo.list_name.name, todo.list_name.name
+            )
+        })
         .collect::<Vec<String>>()
         .join("")
 }

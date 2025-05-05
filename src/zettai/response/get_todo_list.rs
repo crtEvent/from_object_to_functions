@@ -10,7 +10,7 @@ pub fn get_todo_list(
 ) -> Html<String> {
     let list_data = extract_list_data(user_name, list_name);
     let todo_list = fetch_list_content(hub, &list_data);
-    let html = render_html(&todo_list);
+    let html = render_html(&list_data.0, &todo_list);
     html
 }
 
@@ -26,7 +26,7 @@ fn fetch_list_content(hub: Arc<Mutex<dyn ZettaiHub>>, list_id: &(User, ListName)
         .expect("List unknown")
 }
 
-fn render_html(todo_list: &ToDoList) -> Html<String> {
+fn render_html(user: &User, todo_list: &ToDoList) -> Html<String> {
     let item_html = render_items_to_html(&todo_list.items);
     let html = format!(
         r#"
@@ -37,10 +37,26 @@ fn render_html(todo_list: &ToDoList) -> Html<String> {
                     <table>
                         <tbody>{}</tbody>
                     </table>
+                    <hr>
+                    <h5>Add item to list</h5>
+                    <form action="/todo/{}/{}" method="post">
+                        <label for="item_name">Item Name: </label>
+                        <input type="text" name="item_name">
+                        <label for="due_date">Due Date: </label>
+                        <input type="date" name="due_date">
+                        <label for="status">Status: </label>
+                        <select name="status">
+                            <option value="todo">Todo</option>
+                            <option value="in_progress">InProgress</option>
+                            <option value="done">Done</option>
+                            <option value="blocked">Blocked</option>
+                        </select>
+                        <input type="submit" value="Submit">
+                    </form>
                 </body>
             </html>
             "#,
-        todo_list.list_name.name, item_html
+        todo_list.list_name.name, item_html, user.name, todo_list.list_name.name
     );
 
     Html(html)

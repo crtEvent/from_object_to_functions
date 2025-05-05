@@ -83,6 +83,7 @@ impl ToDoStatus {
         match s.to_lowercase().as_str() {
             "todo" => ToDoStatus::Todo,
             "inprogress" => ToDoStatus::InProgress,
+            "in_progress" => ToDoStatus::InProgress,
             "done" => ToDoStatus::Done,
             "blocked" => ToDoStatus::Blocked,
             _ => ToDoStatus::Todo,
