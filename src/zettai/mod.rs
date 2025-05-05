@@ -4,6 +4,7 @@ pub mod business {
     pub mod domain;
     pub mod todolist_fetcher;
     pub mod zettai_hub;
+    pub mod domain_error;
 }
 
 pub mod response {
@@ -12,6 +13,8 @@ pub mod response {
     pub mod get_all_todo_lists;
     pub mod get_end_page;
     pub mod get_todo_list;
+    pub mod create_new_todo_list;
+    pub mod get_error_page;
 }
 
 mod test {
@@ -26,4 +29,5 @@ mod test {
     mod test_add_new_item;
     mod test_get_all_todo_lists;
     mod test_get_todo_list;
+    mod test_create_new_todo_list;
 }

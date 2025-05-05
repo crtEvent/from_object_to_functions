@@ -39,9 +39,16 @@ fn render_html(user: &User, todo_lists: &Vec<ToDoList>) -> Html<String> {
                         <tbody>{}</tbody>
                     </table>
                 </body>
+                <hr>
+                <h5>Create new to-do List</h5>
+                <form action="/todo/{}" method="post">
+                    <label for="list_name">List Name: </label>
+                    <input type="text" name="list_name">
+                    <input type="submit" value="Submit">
+                </form>
             </html>
             "#,
-        user.name, lists_html
+        user.name, lists_html, user.name
     );
 
     Html(html)

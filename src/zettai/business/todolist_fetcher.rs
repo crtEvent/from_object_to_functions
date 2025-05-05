@@ -31,4 +31,12 @@ impl ToDoListFetcherFromMap {
                 map
             });
     }
+
+    pub fn contains_user(&self, user: &User) -> bool {
+        self.store.contains_key(user)
+    }
+
+    pub fn contains_list(&self, user: &User, list_name: &ListName) -> bool {
+        self.store.contains_key(user) && self.store.get(user).unwrap().contains_key(list_name)
+    }
 }

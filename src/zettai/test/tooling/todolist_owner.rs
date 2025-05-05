@@ -48,4 +48,8 @@ impl ToDoListOwner {
         let lists = app.get_all_todo_lists(&self.user()).await;
         assert_eq!(lists.len(), 0);
     }
+
+    pub(crate) async fn can_create_new_list(&self, list_name: &str, app: &AppForAT) {
+        app.create_todo_list(&self.user(), list_name).await;
+    }
 }

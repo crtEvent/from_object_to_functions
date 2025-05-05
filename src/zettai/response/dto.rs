@@ -6,3 +6,8 @@ pub struct AddItemRequest {
     pub due_date: String,
     pub status: String,
 }
+
+#[derive(Deserialize)]
+pub struct CreateTodoListRequest {
+    pub list_name: String,
+}

@@ -51,6 +51,13 @@ impl AppForAT {
         client.post(&url).form(&form).send().await.unwrap();
     }
 
+    pub(crate) async fn create_todo_list(&self, user: &User, list_name: &str) {
+        let client = Client::new();
+        let url = format!("http://localhost:8081/todo/{}", user.name);
+        let form: HashMap<&str, &str> = HashMap::from([("list_name", list_name)]);
+        client.post(&url).form(&form).send().await.unwrap();
+    }
+
     pub(crate) async fn start_the_application(&self, fetcher: ToDoListFetcherFromMap) {
         let hub = ToDoListHub::new(fetcher);
         let app = Zettai::new(Arc::new(Mutex::new(hub)));
