@@ -15,8 +15,12 @@ impl ToDoListFetcherFromMap {
         self.store.get(user)?.get(list_name)
     }
 
-    pub fn get_all(&self, user: &User) -> HashMap<ListName, ToDoList> {
-        self.store.get(user).cloned().unwrap_or(HashMap::new())
+    pub fn get_all(&self, user: &User) -> Option<&HashMap<ListName, ToDoList>> {
+        self.store.get(user)
+    }
+    
+    pub fn assign_user(&mut self, user: &User) {
+        self.store.insert(user.clone(), HashMap::new());
     }
 
     pub fn assign_list_to_user(&mut self, user: &User, list: &ToDoList) {

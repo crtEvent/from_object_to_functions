@@ -6,7 +6,7 @@ use std::iter::once;
 
 pub trait ZettaiHub: Send + Sync {
     fn get_todo_list(&self, user: &User, list_name: &ListName) -> Option<&ToDoList>;
-    fn get_all_todo_lists(&self, user: &User) -> HashMap<ListName, ToDoList>;
+    fn get_all_todo_lists(&mut self, user: &User) -> &HashMap<ListName, ToDoList>;
     fn add_item_to_list(&mut self, user: &User, list_name: &ListName, item: &ToDoItem);
     fn create_new_todo_list(
         &mut self,
@@ -38,8 +38,11 @@ impl ZettaiHub for ToDoListHub {
         self.fetcher.get(user, list_name)
     }
 
-    fn get_all_todo_lists(&self, user: &User) -> HashMap<ListName, ToDoList> {
-        self.fetcher.get_all(user)
+    fn get_all_todo_lists(&mut self, user: &User) -> &HashMap<ListName, ToDoList> {
+        if self.fetcher.get_all(user).is_none() {
+            self.fetcher.assign_user(user);
+        }
+        self.fetcher.get_all(user).unwrap()
     }
 
     fn add_item_to_list(&mut self, user: &User, list_name: &ListName, item: &ToDoItem) {
